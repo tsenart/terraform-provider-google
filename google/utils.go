@@ -378,7 +378,7 @@ func isRetryableError(err error) bool {
 		// 409's are retried because cloud sql throws a 409 when concurrent calls are made.
 		// The only way right now to determine it is a SQL 409 due to concurrent calls is to
 		// look at the contents of the error message.
-		// See https://github.com/terraform-providers/terraform-provider-google/issues/3279
+		// See https://github.com/brendanhay/terraform-provider-google/issues/3279
 		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 409 and error reason 'operationInProgress': %s", err)
 		return true
 	}

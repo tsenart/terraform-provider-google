@@ -14,6 +14,7 @@ import (
 	"google.golang.org/api/googleapi"
 )
 
+
 // resourceGoogleProject returns a *schema.Resource that allows a customer
 // to declare a Google Cloud Project resource.
 func resourceGoogleProject() *schema.Resource {
@@ -86,6 +87,15 @@ func resourceGoogleProject() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"services": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Set:      schema.HashString,
+				Elem:     &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: StringNotInSlice(ignoredProjectServices, false),
+				},
 			},
 			"app_engine": {
 				Type:     schema.TypeList,
@@ -246,6 +256,12 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	services := d
+	d.Set("project", d.Get("project_id"))
+	if err := resourceGoogleProjectServicesCreate(services, meta); err != nil {
+		return err
+	}
+
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
 		return err
@@ -289,6 +305,13 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("number", strconv.FormatInt(p.ProjectNumber, 10))
 	d.Set("name", p.Name)
 	d.Set("labels", p.Labels)
+
+	services := d
+	d.Set("project", d.Get("project_id"))
+	if err := resourceGoogleProjectServicesRead(services, meta); err != nil {
+		return err
+	}
+	d.Set("services", services.Get("services"))
 
 	// We get app_engine.#: "" => "<computed>" without this set
 	// Remove when app_engine field is removed from schema completely
@@ -427,6 +450,12 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("Error updating project %q: %s", project_name, err)
 		}
 		d.SetPartial("labels")
+	}
+
+	services := d
+	d.Set("project", d.Get("project_id"))
+	if err := resourceGoogleProjectServicesUpdate(services, meta); err != nil {
+		return err
 	}
 
 	d.Partial(false)

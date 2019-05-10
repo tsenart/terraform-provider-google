@@ -1,4 +1,4 @@
-module github.com/terraform-providers/terraform-provider-google
+module github.com/brendanhay/terraform-provider-google
 
 require (
 	cloud.google.com/go v0.36.0

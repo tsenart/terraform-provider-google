@@ -110,7 +110,7 @@ func iamPolicyReadModifyWrite(updater ResourceIamUpdater, modify iamPolicyModify
 				}
 				log.Printf("[DEBUG]: Retrieved policy for %s: %+v\n", updater.DescribeResource(), p)
 				if new_p == nil {
-					// https://github.com/terraform-providers/terraform-provider-google/issues/2625
+					// https://github.com/brendanhay/terraform-provider-google/issues/2625
 					fetchBackoff = fetchBackoff * 2
 					continue
 				}
